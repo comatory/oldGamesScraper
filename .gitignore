@@ -1,2 +1,4 @@
+download_list
+*.swp
 *.pyc
 VENV/
