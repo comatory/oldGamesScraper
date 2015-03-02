@@ -10,7 +10,11 @@ The script is written in Python 2.7 and is dependent on some built-in packages (
 - [PyPDF2](http://mstamy2.github.io/PyPDF2/) (1.24)
 - [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/bs4/doc/) (2.7.0)
 
-These can all be installed easily via [pip](https://pypi.python.org/pypi/pip/). Example `pip install urllib2`. Everything works well in `virtualenv` and it is actually a recommended way to run this script.
+These can all be installed easily via [pip](https://pypi.python.org/pypi/pip/) like this:  
+
+	pip install Pillow PyPDF2 beautifulsoup4
+
+Everything works well in `virtualenv` and it is actually a recommended way to run this script.
 
 ## Usage
 
