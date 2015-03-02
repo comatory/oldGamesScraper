@@ -34,4 +34,4 @@ You can add additional magazines into the `magazines` dictionary in the commente
 - make script future proof (add pagination)
 - add argument for JPEG-only download
 - add ePub export
-
+- scrape also diskmags
