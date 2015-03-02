@@ -1,4 +1,5 @@
 download_list
 *.swp
+*.swo
 *.pyc
 VENV/
