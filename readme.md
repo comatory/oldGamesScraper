@@ -32,6 +32,10 @@ apt-get: `apt-get install libjpeg-dev`
 
 Make sure you install Pillow again after the library is installed.
 
+### Windows
+
+Will work fine with provided modules (see above [Requirements](#requirements)).
+
 ## Usage
 
 Run script file with single argument. This argument is the title of the magazine and the script will proceed to download all issues (pagination on magazine page not yet supported). For example:

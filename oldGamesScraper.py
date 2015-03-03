@@ -118,7 +118,7 @@ def download_images(download_list):
 		for image in image_list:
 			image_name = os.path.split(image)[1]
 			list_of_files.append(image_name)
-			f = open(image_name, 'w')
+			f = open(image_name, 'wb')
 			f.write(urllib2.urlopen(image).read())
 			print 'Downloading image: %s' % image
 			f.close()
