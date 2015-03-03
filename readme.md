@@ -16,6 +16,22 @@ These can all be installed easily via [pip](https://pypi.python.org/pypi/pip/) l
 
 Everything works well in `virtualenv` and it is actually a recommended way to run this script.
 
+### OS X
+
+Everything should be working fine if you Xcode tools installed. If you are getting `IOError` you might need to install _libjpeg_ library: either via [MacPorts](http://ethan.tira-thompson.com/Mac_OS_X_Ports.html) or [Homebrew](http://brew.sh):
+
+	brew install libjpeg
+
+### Linux
+
+Make sure you have _libjpeg_ library installed to prevent `IOError`. Uninstall Pillow/PIL if it is already on your system `pip uninstall PIL`.
+
+yum : `yum install libjpeg-devel`
+
+apt-get: `apt-get install libjpeg-dev`
+
+Make sure you install Pillow again after the library is installed.
+
 ## Usage
 
 Run script file with single argument. This argument is the title of the magazine and the script will proceed to download all issues (pagination on magazine page not yet supported). For example:
