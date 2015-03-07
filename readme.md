@@ -38,19 +38,27 @@ Will work fine with provided modules (see above [Requirements](#requirements)).
 
 ## Usage
 
-Run script file with single argument. This argument is the title of the magazine and the script will proceed to download all issues (pagination on magazine page not yet supported). For example:
+Run the script with one or more arguments. The first argument is the title magazine, the other ones are issue numbers (see below on numbering). The following command will download issues 2, 5 and 6 of Score magazine.
 
-	python oldGamesScraper.py score
+	python oldGamesScraper.py score 2 5 6
 
-This will download all the issues of Score magazine. If you need to see all available magazines, launch the script with `--list` argument.
+If you omit the issue numbers, script will proceed to download entire catalog of issues. For example to download all issues of Excalibur, do the following:
+
+	python oldGamesScraper.py excalibur
+
+If you need to see all available magazines, launch the script with `--list` argument. 
 
 	python oldGamesScraper.py --list
 
-You can add additional magazines into the `magazines` dictionary in the commented section.
+One note on the numbering of the magazines. The numbers actually refer to indexes. For example issue [__Excalibur 20+__](http://www.oldgames.sk/mag/excalibur-20-plus/) has index number 24. __Excalibur Zero (0)__ has index number of 1.
+You can count the order of the magazine you wish to download on the webpage (start from number one) to get the exact issue. For most of the magazines the index numbers should equal to actual issue numbers. The filename of PDFs should correspond to the right issue number (as stated on website). Some magazines are renamed due to illegal characters like `/` and `\`.
+
+## Manual addition
+
+You can add additional magazines into the `MAGAZINES` dictionary in the commented section.
 
 ## To be added
 
-- download individual issues
 - make script future proof (add pagination)
 - add argument for JPEG-only download
 - add ePub export

@@ -3,24 +3,44 @@
 import os
 import sys
 import urllib2
+from copy import deepcopy
 from PIL import Image, ImageFile
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 from bs4 import BeautifulSoup
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-def parser():
-	try:
-		return sys.argv[1].lower()
-	except IndexError:
-		print 'no argument specified'
+class IssueException(Exception):
+	def __init__(self):
+		print 'Issue number fail/not existing (use number only)'
 
+class IssueNameException(Exception):
+	def __init__(self):
+		print 'Use issue names only, see `--list`'
+
+class ArgException(Exception):
+	def __init__(self):
+		print 'Too many arguments'
+
+def parser(args):
+	if len(args) == 2 and not args[1].isdigit():
+		return args[1].lower(), 'all'
+	elif args[1].isdigit():
+		raise IssueNameException
+
+	if len(args) >= 3 and not args[1].isdigit():
+		for arg in args[2:]:
+			if not arg.isdigit():
+				raise ArgException
+		return args[1].lower(), args[2:]
+	else:
+		raise IssueException
 
 the_url = 'http://www.oldgames.sk'
 base_url = the_url + '/mags/'
 
 # Add magazines + relative URLs here
-magazines = {
+MAGAZINES = {
 		'score': 'score/',
 		'level': 'level/',
 		'amiga': 'amiga-magazin/',
@@ -35,28 +55,34 @@ magazines = {
 		'riki': 'riki/',
 		'zzap64': 'zzap64/'}
 
-issue_links = []
-download_list = {}
 
-def parse_args(arg):
-	if arg == '--list':
-		items = [i for i in magazines.keys()]
-		for item in items:
-			print item
-		sys.exit()
-	elif arg in magazines:
-		print "Scraping %s magazine..." % arg.capitalize()
-		return base_url + magazines[arg]
+def extract_magazine_page(parsed):
+	if parsed[0] in MAGAZINES:
+		print 'Scraping %s ...' % parsed[0].capitalize()
+		return base_url + MAGAZINES[parsed[0]]
 	else:
-		return sys.exit('invalid magazine name')
+		raise IssueNameException
 
-def extract_links_to_issue(url):
+def extract_links_to_issue(url, parsed):
+	issue_links = []
 	soup = BeautifulSoup(urllib2.urlopen(url))
 
 	for div in soup.findAll('div','mImage'):
 		issue_links.append(the_url + div.a['href'])
 
+	if parsed[1] != 'all':
+		temp_issue_links = [] 
+		for issue_indexes in parsed[1:]:
+			for issue in issue_indexes:
+				try:
+					temp_issue_links.append(issue_links[int(issue) - 1])
+				except IndexError:
+					raise IssueException
+
+		return temp_issue_links
+
 	print 'Scraped %d links' % len(issue_links)
+	return issue_links
 
 def issue_renamer(issue_name):
 	char1 = '\\'
@@ -72,8 +98,9 @@ def issue_renamer(issue_name):
 	return issue_name
 
 def extract_links_to_images(issue_links):
+	download_list = {}
 	for index, link in enumerate(issue_links):
-		print 'Scraping issue #%d: %s' % (index + 1, link)
+		print 'Scraping in queue %d/%d: %s' % (index + 1, len(issue_links), link)
 		issue_soup = BeautifulSoup(urllib2.urlopen(link))
 		image_list = []
 		for image in issue_soup.findAll('div', 'mags_thumb_article'):
@@ -81,6 +108,8 @@ def extract_links_to_images(issue_links):
 			image_list.append(the_url + image.a['href'])
 
 		download_list[issue_name] = image_list
+	
+	return download_list
 
 def clean_up(list_of_files, list_of_pdfs):
 	num = len(list_of_files) + len(list_of_pdfs)
@@ -124,8 +153,8 @@ def download_images(download_list):
 			f.close()
 		convert_images(list_of_files, issues)
 
-
-arg = parser()
-extract_links_to_issue(parse_args(arg))
-extract_links_to_images(issue_links)
-download_images(download_list)
+parsed = parser(sys.argv)
+url = extract_magazine_page(parsed)
+issue_links = extract_links_to_issue(url, parsed)
+download_list = extract_links_to_images(issue_links)
+list_of_files = download_images(download_list)
