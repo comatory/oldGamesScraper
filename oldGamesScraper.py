@@ -23,6 +23,12 @@ class ArgException(Exception):
 		print 'Too many arguments'
 
 def parser(args):
+	if args[1] == '--list':
+		print '\n', 'Available parameters:'
+		for mag in sorted(MAGAZINES.keys()):
+			print mag
+		sys.exit(0)
+
 	if len(args) == 2 and not args[1].isdigit():
 		return args[1].lower(), 'all'
 	elif args[1].isdigit():
