@@ -18,13 +18,13 @@ Everything works well in `virtualenv` and it is actually a recommended way to ru
 
 ### OS X
 
-Everything should be working fine if you Xcode tools installed. If you are getting `IOError` you might need to install _libjpeg_ library: either via [MacPorts](http://ethan.tira-thompson.com/Mac_OS_X_Ports.html) or [Homebrew](http://brew.sh):
+Everything should be working fine if you Xcode tools installed. If you are getting `CodecError` you might need to install _libjpeg_ library: either via [MacPorts](http://ethan.tira-thompson.com/Mac_OS_X_Ports.html) or [Homebrew](http://brew.sh):
 
 	brew install libjpeg
 
 ### Linux
 
-Make sure you have _libjpeg_ library installed to prevent `IOError`. Uninstall Pillow/PIL if it is already on your system `pip uninstall PIL`.
+Make sure you have _libjpeg_ library installed to prevent `CodecError`. Uninstall Pillow/PIL if it is already on your system `pip uninstall PIL`.
 
 yum : `yum install libjpeg-devel`
 
@@ -38,7 +38,9 @@ Will work fine with provided modules (see above [Requirements](#requirements)).
 
 ## Usage
 
-Run the script with one or more arguments. The first argument is the title magazine, the other ones are issue numbers (see below on numbering). The following command will download issues 2, 5 and 6 of Score magazine.
+Run the script with one or more arguments. The first argument is the title magazine, the other ones are issue numbers (see below on numbering). 
+
+The following command will download issues 2, 5 and 6 of Score magazine:
 
 	python oldGamesScraper.py score 2 5 6
 
@@ -50,7 +52,9 @@ If you need to see all available magazines, launch the script with `--list` argu
 
 	python oldGamesScraper.py --list
 
-One note on the numbering of the magazines. The numbers actually refer to indexes. For example issue [__Excalibur 20+__](http://www.oldgames.sk/mag/excalibur-20-plus/) has index number 24. __Excalibur Zero (0)__ has index number of 1.
+## Numbering
+
+One note on the numbering of the magazines. The numbers actually refer to indexes. For example issue [*Excalibur 20+*](http://www.oldgames.sk/mag/excalibur-20-plus/) has index number 24. _Excalibur Zero (0)_ has index number of 1.
 You can count the order of the magazine you wish to download on the webpage (start from number one) to get the exact issue. For most of the magazines the index numbers should equal to actual issue numbers. The filename of PDFs should correspond to the right issue number (as stated on website). Some magazines are renamed due to illegal characters like `/` and `\`.
 
 ## Manual addition
@@ -59,7 +63,6 @@ You can add additional magazines into the `MAGAZINES` dictionary in the commente
 
 ## To be added
 
-- make script future proof (add pagination)
 - add argument for JPEG-only download
 - add ePub export
-- scrape also diskmags
+- scrape also Diskmags

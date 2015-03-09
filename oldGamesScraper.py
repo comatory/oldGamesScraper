@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+# EXCEPTION errors
+
 class IssueException(Exception):
 	def __init__(self):
 		print 'Issue number fail/not existing (use number only)'
@@ -22,18 +24,23 @@ class ArgException(Exception):
 	def __init__(self):
 		print 'Too many arguments'
 
+# Command-line parser
+
 def parser(args):
+
 	if args[1] == '--list':
 		print '\n', 'Available parameters:'
 		for mag in sorted(MAGAZINES.keys()):
 			print mag
 		sys.exit(0)
 
+	# enable DL for all issues
 	if len(args) == 2 and not args[1].isdigit():
 		return args[1].lower(), 'all'
 	elif args[1].isdigit():
 		raise IssueNameException
 
+	# all args following issue name (string) must be ints
 	if len(args) >= 3 and not args[1].isdigit():
 		for arg in args[2:]:
 			if not arg.isdigit():
@@ -43,7 +50,7 @@ def parser(args):
 		raise IssueException
 
 the_url = 'http://www.oldgames.sk'
-base_url = the_url + '/mags/'
+base_url = the_url + '/mags/' # hub page for all magazines & diskmags
 
 # Add magazines + relative URLs here
 MAGAZINES = {
@@ -62,6 +69,8 @@ MAGAZINES = {
 		'zzap64': 'zzap64/'}
 
 
+# returns URL of magazine that was passed as arg
+
 def extract_magazine_page(parsed):
 	if parsed[0] in MAGAZINES:
 		print 'Scraping %s ...' % parsed[0].capitalize()
@@ -69,13 +78,18 @@ def extract_magazine_page(parsed):
 	else:
 		raise IssueNameException
 
+
+# gets links to individual issues
+
 def extract_links_to_issue(url, parsed):
 	issue_links = []
 	soup = BeautifulSoup(urllib2.urlopen(url))
 
+	# gets URLs of issues to list
 	for div in soup.findAll('div','mImage'):
 		issue_links.append(the_url + div.a['href'])
 
+	# only when DLing all issues
 	if parsed[1] != 'all':
 		temp_issue_links = [] 
 		for issue_indexes in parsed[1:]:
@@ -90,43 +104,111 @@ def extract_links_to_issue(url, parsed):
 	print 'Scraped %d links' % len(issue_links)
 	return issue_links
 
+
+# Avoiding illegal chars to not create folders
+
 def issue_renamer(issue_name):
 	char1 = '\\'
 	char2 = '/'
 	replacement = '-'
+	old_name = deepcopy(issue_name)
 	if char1 in issue_name:
 		issue_name = issue_name.replace(char1, replacement)
-		print 'inv. char (%s): renaming to %s' % (char1, issue_name)
 	elif char2 in issue_name:
 		issue_name = issue_name.replace(char2, replacement)
-		print 'inv. char (%s): renaming to %s' % (char2, issue_name)
-
+	
+	print 'Renamed %s to %s (inv. char.)' % (old_name, issue_name)
 	return issue_name
 
+
+# Check if magazine page has more pages
+
+def paginate_check(url):
+	paginate_soup = BeautifulSoup(urllib2.urlopen(url))
+	# tag for `next page` button
+	paginate = paginate_soup.findAll('span', 'paging_PageInactive')
+	issue_links= []
+
+	if paginate:
+		print 'Pagination detected'
+		for page in paginate:
+			try:
+				issue_links.append(the_url + page.a['href'])
+			except AttributeError:
+				pass
+		
+	# delete duplicate links
+	clean_links = []
+	for link in issue_links:
+		if link in clean_links:
+			pass
+		else:
+			clean_links.append(link)
+
+		if link == None:
+			clean_links.remove(link)
+
+	return clean_links 
+
+
+# Collect all links to JPEGs, assign to issue number
+
 def extract_links_to_images(issue_links):
-	download_list = {}
+	download_list = {} # will be passed for converting
+	more_pages = [] # for pagination only
+
+	# check pagination
+	for link in issue_links:
+		print 'checking pagination in ', link
+		more_pages.append(paginate_check(link))
+
+	for link_set in more_pages:
+		for link in link_set:
+			issue_links.append(link)
+
+	# process all links, assign them to `download_list` dict
 	for index, link in enumerate(issue_links):
 		print 'Scraping in queue %d/%d: %s' % (index + 1, len(issue_links), link)
 		issue_soup = BeautifulSoup(urllib2.urlopen(link))
-		image_list = []
+		image_list = [] # list w/ full-res image links
 		for image in issue_soup.findAll('div', 'mags_thumb_article'):
 			issue_name = issue_renamer(issue_soup.findAll('h1','top')[0].text)
 			image_list.append(the_url + image.a['href'])
 
-		download_list[issue_name] = image_list
-	
+		# updates existing issue number (key), it's a check for paginated URLs
+		if issue_name in download_list.keys():
+			download_list[issue_name] += image_list # append new URLs to existing ones
+			# update with collections.defaultdict
+			# http://stackoverflow.com/questions/10664856/make-dictionary-with-duplicate-keys-in-python
+		else:
+			download_list[issue_name] = image_list
+
 	return download_list
+
+
+# Deletes all JPEGs and single-paged PDFs
 
 def clean_up(list_of_files, list_of_pdfs):
 	num = len(list_of_files) + len(list_of_pdfs)
 	for file in list_of_files:
-		os.remove(file)
+		try:
+			os.remove(file)
+		except OSError:
+			pass
 	for pdf in list_of_pdfs:
-		os.remove(pdf)
+		try:
+			os.remove(pdf)
+		except OSError:
+			pass
 	print 'Cleaned up %d files' % num
 
+
+# Convert existing JPEGs to PDFs
+# then combine into multi-paged PDF
+
 def convert_images(list_of_files, issue):
-	list_of_pdfs = []
+	list_of_pdfs = [] # records files jpeg -> PDF
+
 	for index, file in enumerate(list_of_files):
 		im = Image.open(file)
 		outfile = file + '.pdf'
@@ -146,10 +228,14 @@ def convert_images(list_of_files, issue):
 
 	clean_up(list_of_files, list_of_pdfs)
 
+
+# Write/DL JPEGs to disk
+
 def download_images(download_list):
 	for issues,image_list in download_list.items():
 		print 'Preparing %s ...' % issues
 		list_of_files = []
+
 		for image in image_list:
 			image_name = os.path.split(image)[1]
 			list_of_files.append(image_name)
@@ -157,6 +243,7 @@ def download_images(download_list):
 			f.write(urllib2.urlopen(image).read())
 			print 'Downloading image: %s' % image
 			f.close()
+
 		convert_images(list_of_files, issues)
 
 parsed = parser(sys.argv)
