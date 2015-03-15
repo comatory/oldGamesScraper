@@ -36,8 +36,8 @@ def test_extract_magazine_page_fail():
 def test_extract_all_links_to_issue():
 	parsed = ('score','all')
 	issue_links = extract_links_to_issue(URL, parsed)
-	# as of date Mar-7-2015 = 39 issues of Score
-	assert_equal(len(issue_links), 39)
+	# as of date Mar-7-2015 = 40 issues of Score
+	assert_equal(len(issue_links), 40)
 
 def test_extract_single_link():
 	parsed = ('score', '5')
@@ -45,9 +45,10 @@ def test_extract_single_link():
 	assert_equal(len(issue_links), 1)
 
 def test_extract_multiple_links():
-	parsed = ('score', '5', '8', '10', '22')
+	parsed = ('score', '6', '15', '22')
 	issue_links = extract_links_to_issue(URL, parsed)
-	assert_equal(len(issue_links), 4)
+	# including paginated issues
+	assert_equal(len(issue_links), 5)
 
 def test_issue_renamer():
 	assert_equal(issue_renamer('Score 2/96'), 'Score 2-96')

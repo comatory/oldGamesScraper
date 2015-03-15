@@ -24,6 +24,7 @@ Everything should be working fine if you Xcode tools installed. If you are getti
 
 ### Linux
 
+Ubuntu can give you trouble because of missing installation, if that's the case then do `sudo apt-get install python-dev` to have everything you need.
 Make sure you have _libjpeg_ library installed to prevent `CodecError`. Uninstall Pillow/PIL if it is already on your system `pip uninstall PIL`.
 
 yum : `yum install libjpeg-devel`

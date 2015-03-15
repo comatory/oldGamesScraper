@@ -117,6 +117,7 @@ def issue_renamer(issue_name):
 	elif char2 in issue_name:
 		issue_name = issue_name.replace(char2, replacement)
 	
+	# fix `old_name` error, get rid of multiple displays
 	print 'Renamed %s to %s (inv. char.)' % (old_name, issue_name)
 	return issue_name
 
@@ -233,6 +234,7 @@ def convert_images(list_of_files, issue):
 
 def download_images(download_list):
 	for issues,image_list in download_list.items():
+		# fix number, add real number from h1
 		print 'Preparing %s ...' % issues
 		list_of_files = []
 
