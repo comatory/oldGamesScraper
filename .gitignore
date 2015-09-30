@@ -1,7 +1,10 @@
+.DS_Store
 *.pdf
 *.jpg
 download_list
 *.swp
+.*.swp
+.*.swo
 *.swo
 *.pyc
 VENV/

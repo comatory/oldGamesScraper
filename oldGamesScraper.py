@@ -3,6 +3,7 @@
 import os
 import sys
 import urllib2
+import pdb
 from copy import deepcopy
 from PIL import Image, ImageFile
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
@@ -14,15 +15,18 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class IssueException(Exception):
 	def __init__(self):
-		print 'Issue number fail/not existing (use number only)'
+		print '\nIssue number fail/not existing (use number only)'
+                exit(0)
 
 class IssueNameException(Exception):
 	def __init__(self):
-		print 'Use issue names only, see `--list`'
+		print '\nUse issue names only, see `--list`'
+                exit(0)
 
 class ArgException(Exception):
 	def __init__(self):
-		print 'Too many arguments'
+		print '\nToo many arguments'
+                exit(0)
 
 # Command-line parser
 
@@ -83,11 +87,22 @@ def extract_magazine_page(parsed):
 
 def extract_links_to_issue(url, parsed):
 	issue_links = []
-	soup = BeautifulSoup(urllib2.urlopen(url))
+        page_urls = []
+	soup = BeautifulSoup(urllib2.urlopen(url), "html.parser")
+
+        # get URLs if paginated
+        page_count = len(soup.findAll('table', 'paging_box')[0].findAll('span', 'paging_PageInactive'))
+        page_count += 1
+
+        # set up paginated issue pages
+        for page in range(0, page_count):
+            page_urls.append(url + 'pages/' + str(page))
 
 	# gets URLs of issues to list
-	for div in soup.findAll('div','mImage'):
-		issue_links.append(the_url + div.a['href'])
+        for page_url in page_urls:
+            soup = BeautifulSoup(urllib2.urlopen(page_url), "html.parser")
+            for div in soup.findAll('div','mImage'):
+                    issue_links.append(the_url + div.a['href'])
 
 	# only when DLing all issues
 	if parsed[1] != 'all':
