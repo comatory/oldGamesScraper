@@ -70,7 +70,16 @@ MAGAZINES = {
 		'pocitac-aktivne': 'pocitac-aktivne/',
 		'pocitacove-hry': 'pocitacove-hry/',
 		'riki': 'riki/',
-		'zzap64': 'zzap64/'}
+		'zzap64': 'zzap64/',
+                # diskmags:
+                'bonus': 'bonus/',
+                'guru': 'guru/',
+                'klan': 'klan/',
+                'narsil': 'narsil/',
+                'pareniste': 'pareniste/',
+                'pcengine': 'pcengine/',
+                'slanina': 'slanina/'
+                }
 
 
 # returns URL of magazine that was passed as arg
@@ -140,7 +149,7 @@ def issue_renamer(issue_name):
 # Check if magazine page has more pages
 
 def paginate_check(url):
-	paginate_soup = BeautifulSoup(urllib2.urlopen(url))
+	paginate_soup = BeautifulSoup(urllib2.urlopen(url), "html.parser")
 	# tag for `next page` button
 	paginate = paginate_soup.findAll('span', 'paging_PageInactive')
 	issue_links= []

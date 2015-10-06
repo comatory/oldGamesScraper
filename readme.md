@@ -67,4 +67,3 @@ You can add additional magazines into the `MAGAZINES` dictionary in the commente
 - FIX TESTS !
 - add argument for JPEG-only download
 - add ePub export
-- scrape also Diskmags
